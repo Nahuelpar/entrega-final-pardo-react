@@ -1,25 +1,43 @@
 import "./App.css";
-import Button from "./components/Button/Button";
-import List from "./components/List/List";
-import Navbar from "./components/Navbar/Navbar";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import ProductList from "./components/ProductList";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Home from "./components/Home";
+import Navbar from "./components/Navbar";
+import ProductItem from "./components/ProductItem";
 
-const frutas = ["Sahumerios", "Piedras", "Estatuillas", "Cuadritos"];
+function App() {
+  const [productos, setProductos] = useState([]);
 
-const App = () => {
-  const handleClick = () => {
-    alert("Click me!");
+  const getProductos = async () => {
+    const res = await axios.get("https://fakestoreapi.com/products");
+    setProductos(res.data);
   };
+
+  useEffect(() => {
+    getProductos();
+  }, []);
 
   return (
     <div>
+      <h1>Mi tienda</h1>
       <Navbar />
-      <h1>OM SHOP</h1>
-      <List frutas={frutas} />
-      <Button txtBtn="Contacto" handleClick={handleClick} />
-      <Button txtBtn="Productos" handleClick={handleClick} />
-      <Button txtBtn="Nuestra historia" handleClick={handleClick} />
+      <Routes>
+        <Route path="/" element={<Navigate to="home" />} />
+        <Route path="/home" element={<Home />} />
+        <Route
+          path="/productos"
+          element={<ProductList productos={productos} />}
+        />
+        <Route
+          path="/productos/:id"
+          element={<ProductItem productos={productos} />}
+        />
+        <Route path="*" element={<h2>404</h2>} />
+      </Routes>
     </div>
   );
-};
+}
 
 export default App;

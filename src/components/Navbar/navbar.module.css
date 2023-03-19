@@ -1,6 +1,4 @@
 .container {
-    background-color: coral;
-    display: flex;
-    justify-content: space-around;
-    color: cornsilk;
-  }
+  display: flex;
+  justify-content: space-around;
+}
