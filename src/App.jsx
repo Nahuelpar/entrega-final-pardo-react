@@ -1,40 +1,54 @@
 import "./App.css";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import ProductList from "./components/ProductList";
-import { Navigate, Route, Routes } from "react-router-dom";
-import Home from "./components/Home";
-import Navbar from "./components/Navbar";
-import ProductItem from "./components/ProductItem";
+import db from "../db/firebase-config";
+import { useState, useEffect } from "react";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import ListItems from "./components/ListItems";
+import { Route, Routes } from "react-router-dom";
+import ItemDetail from "./components/ItemDetail";
 
 function App() {
-  const [productos, setProductos] = useState([]);
+  const [items, setItems] = useState([]);
+  const itemsCollectionRef = collection(db, "items");
+  const [loading, setLoading] = useState(true);
 
-  const getProductos = async () => {
-    const res = await axios.get("https://fakestoreapi.com/products");
-    setProductos(res.data);
+  const getItems = async () => {
+    const itemsCollection = await getDocs(itemsCollectionRef);
+    setItems(
+      itemsCollection.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+    );
+    setLoading(false);
+  };
+
+  const deleteItem= async (id) => {
+    const docRer = doc(db, "items", id);
+    await deleteDoc(docRef);
+    getItems();
   };
 
   useEffect(() => {
-    getProductos();
+    getItems();
   }, []);
+
+  if (loading) {
+    return <h1>Loading...</h1>;
+  }
 
   return (
     <div>
-      <h1>Mi tienda</h1>
-      <Navbar />
       <Routes>
-        <Route path="/" element={<Navigate to="home" />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<h1>OM SHOP</h1>} />
         <Route
-          path="/productos"
-          element={<ProductList productos={productos} />}
+          path="/items"
+          element={
+            <ListItems
+              items={items}
+              setItems={setItems}
+              deleteItem={deleteItem}
+            />
+          }
         />
-        <Route
-          path="/productos/:id"
-          element={<ProductItem productos={productos} />}
-        />
-        <Route path="*" element={<h2>404</h2>} />
+        <Route path="/items/:id" element={<ItemDetail />} />
+        <Route path="/404" element={<h1>404 Not Found</h1>} />
       </Routes>
     </div>
   );
